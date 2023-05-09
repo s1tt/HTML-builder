@@ -3,24 +3,34 @@ const path = require('path');
 
 async function copyDir(srcDir, destDir) {
   try {
-    // создаем папку destDir
-    await fs.mkdir(destDir, {recursive: true});
+    try {
+      await fs.rm(destDir, {recursive: true});
+      console.log();
+    } catch (err) {
+      console.log();
+    } finally {
+      // создаем папку destDir
+      await fs.mkdir(destDir, {recursive: true});
 
-    // читаем содержимое папки srcDir
-    const files = await fs.readdir(srcDir);
+      // читаем содержимое папки srcDir
+      const files = await fs.readdir(srcDir);
 
-    // рекурсивно копируем содержимое каждого файла/папки из srcDir в destDir
-    for (const file of files) {
-      const srcPath = path.join(srcDir, file);
-      const destPath = path.join(destDir, file);
+      // рекурсивно копируем содержимое каждого файла/папки из srcDir в destDir
+      for (const file of files) {
+        const srcPath = path.join(srcDir, file);
+        const destPath = path.join(destDir, file);
 
-      const stat = await fs.stat(srcPath);
-      if (stat.isDirectory()) {
-        await copyDir(srcPath, destPath);
-      } else {
-        await fs.copyFile(srcPath, destPath);
+        const stat = await fs.stat(srcPath);
+        if (stat.isDirectory()) {
+          await copyDir(srcPath, destPath);
+        } else {
+          await fs.copyFile(srcPath, destPath);
+        }
       }
     }
+
+
+
   } catch (err) {
     console.error(`Error copying directory: ${err}`);
   }
